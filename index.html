@@ -1,111 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>批量展示图片</title>
     <style>
         body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(to right, #eef2f3, #8e9eab);
-            margin: 0;
-            padding: 20px;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
             color: #333;
         }
-
         h1 {
             text-align: center;
-            font-size: 2em;
-            color: #333;
+            color: #444;
         }
-
-        p {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-
         textarea {
             width: 100%;
-            height: 150px;
+            height: 100px;
             margin-bottom: 10px;
-            border: 2px solid #ddd;
+            border: 1px solid #ccc;
             border-radius: 5px;
             padding: 10px;
             font-size: 14px;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
         button {
             padding: 10px 20px;
-            font-size: 14px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+            margin: 5px;
+            transition: background-color 0.3s ease;
         }
-
         button:hover {
-            transform: translateY(-2px);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        #gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .image-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 15px;
-            background-color: #fff;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .image-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .image-container img {
-            max-width: 100%;
-            max-height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .action-buttons {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .action-buttons button {
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 15px;
-        }
-
-        .action-buttons button:hover {
             background-color: #0056b3;
         }
-
+        .image-container {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .image-box {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+        .image-box img {
+            max-width: 200px;
+            max-height: 150px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .image-box img:hover {
+            transform: scale(1.1);
+        }
+        .selected {
+            border: 3px solid #28a745;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -114,49 +74,93 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
             justify-content: center;
             align-items: center;
+            z-index: 1000;
         }
-
         .modal img {
             max-width: 90%;
             max-height: 90%;
-            border-radius: 8px;
         }
-
         .modal-close {
             position: absolute;
             top: 20px;
             right: 20px;
             color: white;
             font-size: 30px;
+            font-weight: bold;
             cursor: pointer;
         }
     </style>
 </head>
-
 <body>
-    <h1>批量展示图片</h1>
-    <p>粘贴图片 URL 到下方文本框，每行一个：</p>
-    <textarea id="imageUrls" placeholder="输入图片 URL，每行一个"></textarea>
-    <div style="text-align: center; margin-top: 10px;">
-        <button onclick="displayImages()">展示图片</button>
-        <button onclick="displayUniqueImages()">去重展示</button>
-        <button onclick="copySelectedUrls()">批量拷贝</button>
-        <button onclick="downloadSelectedImages()">批量下载</button>
-    </div>
-    <div id="gallery"></div>
+    <h1>批量图片展示</h1>
+    <textarea id="imageUrls" placeholder="输入图片的 URL，每行一个"></textarea>
+    <button onclick="displayImages()">展示图片</button>
+    <button onclick="copySelectedUrls()">复制选中图片的 URL</button>
+    <div class="image-container" id="imageContainer"></div>
 
-    <!-- 模态框 -->
     <div class="modal" id="modal">
         <span class="modal-close" onclick="closeModal()">×</span>
         <img id="modalImage" src="" alt="放大图片">
     </div>
 
     <script>
-        // 插入之前提供的 JavaScript 脚本
+        const selectedUrls = new Set(); // 存储选中图片的 URL
+
+        function displayImages() {
+            const container = document.getElementById('imageContainer');
+            container.innerHTML = ''; // 清空之前的内容
+            selectedUrls.clear(); // 清空选中记录
+            const urls = document.getElementById('imageUrls').value.split('\n').map(url => url.trim()).filter(url => url);
+            urls.forEach(url => {
+                const box = document.createElement('div');
+                box.className = 'image-box';
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = '图片加载失败';
+                img.onclick = () => toggleSelectImage(box, url); // 点击选择图片
+                img.ondblclick = () => openModal(url); // 双击放大图片
+                box.appendChild(img);
+                container.appendChild(box);
+            });
+        }
+
+        function toggleSelectImage(box, url) {
+            if (selectedUrls.has(url)) {
+                selectedUrls.delete(url);
+                box.classList.remove('selected');
+            } else {
+                selectedUrls.add(url);
+                box.classList.add('selected');
+            }
+        }
+
+        async function copySelectedUrls() {
+            if (selectedUrls.size === 0) {
+                alert('请先选择图片！');
+                return;
+            }
+            const urls = Array.from(selectedUrls).join('\n');
+            try {
+                await navigator.clipboard.writeText(urls);
+                alert('选中图片的 URL 已成功复制！');
+            } catch (err) {
+                alert('复制失败，请重试！');
+            }
+        }
+
+        function openModal(url) {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = url;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+        }
     </script>
 </body>
-
 </html>
