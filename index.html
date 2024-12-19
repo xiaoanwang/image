@@ -173,6 +173,11 @@
         .label-buttons input {
             margin: 0 5px;
         }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
     </style>
 </head>
 
@@ -182,7 +187,6 @@
         <textarea id="imageUrls" placeholder="输入图片 URL，每行一个"></textarea>
         <div>
             <button onclick="displayImages()">展示图片</button>
-            <button onclick="copySelectedUrls()">复制选中图片 URL</button>
         </div>
     </div>
     <div id="gallery"></div>
@@ -193,14 +197,23 @@
         <img id="modalImage" src="" alt="放大图片">
     </div>
 
+    <div class="button-container">
+        <button onclick="copySelectedUrls()">复制选中图片 URL</button>
+        <button onclick="copyLabeledUrls('A')">复制标注为 A 的图片 URL</button>
+        <button onclick="copyLabeledUrls('B')">复制标注为 B 的图片 URL</button>
+        <button onclick="copyLabeledUrls('C')">复制标注为 C 的图片 URL</button>
+    </div>
+
     <script>
         const selectedUrls = new Set();
+        const imageLabels = {};  // 存储每个图片 URL 的标签信息
 
         // 展示图片
         function displayImages() {
             const gallery = document.getElementById('gallery');
             gallery.innerHTML = ''; // 清空之前的内容
             selectedUrls.clear(); // 清空选中的 URL
+            Object.keys(imageLabels).forEach(key => imageLabels[key] = []); // 清空标签
 
             const urls = document.getElementById('imageUrls').value.split('\n').map(url => url.trim()).filter(url => url);
 
@@ -217,7 +230,7 @@
                     placeholder.textContent = '图片加载失败';
                     container.appendChild(placeholder);
                 };
-                img.onclick = () => openModal(url);  // 确保点击图片查看功能
+                img.onclick = () => openModal(url);
 
                 const actionButtons = document.createElement('div');
                 actionButtons.className = 'action-buttons';
@@ -255,12 +268,19 @@
                     checkbox.id = `${url}-${label}`;
                     checkbox.name = 'label';
                     checkbox.value = label;
-                    const labelElem = document.createElement('label');
-                    labelElem.setAttribute('for', `${url}-${label}`);
-                    labelElem.textContent = label;
-
+                    checkbox.onclick = () => {
+                        imageLabels[url] = imageLabels[url] || [];
+                        if (checkbox.checked) {
+                            imageLabels[url].push(label);
+                        } else {
+                            imageLabels[url] = imageLabels[url].filter(item => item !== label);
+                        }
+                    };
+                    const labelText = document.createElement('label');
+                    labelText.htmlFor = `${url}-${label}`;
+                    labelText.textContent = label;
                     labelButtons.appendChild(checkbox);
-                    labelButtons.appendChild(labelElem);
+                    labelButtons.appendChild(labelText);
                 });
 
                 actionButtons.appendChild(selectButton);
@@ -282,6 +302,21 @@
             const urls = Array.from(selectedUrls).join('\n');
             navigator.clipboard.writeText(urls).then(() => {
                 alert('选中图片的 URL 已复制到剪贴板');
+            }).catch(() => {
+                alert('复制失败');
+            });
+        }
+
+        // 复制标注为 A、B 或 C 的图片 URL
+        function copyLabeledUrls(label) {
+            const labeledUrls = Object.keys(imageLabels).filter(url => imageLabels[url].includes(label));
+            if (labeledUrls.length === 0) {
+                alert(`没有标注为 ${label} 的图片`);
+                return;
+            }
+            const urls = labeledUrls.join('\n');
+            navigator.clipboard.writeText(urls).then(() => {
+                alert(`标注为 ${label} 的图片 URL 已复制到剪贴板`);
             }).catch(() => {
                 alert('复制失败');
             });
