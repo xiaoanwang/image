@@ -163,6 +163,16 @@
         .modal .close:hover {
             color: #f1f1f1;
         }
+
+        .label-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .label-buttons input {
+            margin: 0 5px;
+        }
     </style>
 </head>
 
@@ -235,11 +245,29 @@
                     }
                 };
 
+                // 创建标签选择按钮 A、B、C
+                const labelButtons = document.createElement('div');
+                labelButtons.className = 'label-buttons';
+
+                ['A', 'B', 'C'].forEach(label => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `${url}-${label}`;
+                    checkbox.name = 'label';
+                    checkbox.value = label;
+                    const labelElem = document.createElement('label');
+                    labelElem.setAttribute('for', `${url}-${label}`);
+                    labelElem.textContent = label;
+
+                    labelButtons.appendChild(checkbox);
+                    labelButtons.appendChild(labelElem);
+                });
+
                 actionButtons.appendChild(selectButton);
                 actionButtons.appendChild(copyButton);
-
                 container.appendChild(img);
                 container.appendChild(actionButtons);
+                container.appendChild(labelButtons);
                 gallery.appendChild(container);
             });
         }
@@ -259,20 +287,4 @@
             });
         }
 
-        // 打开模态框
-        function openModal(imageUrl) {
-            const modal = document.getElementById('modal');
-            const modalImage = document.getElementById('modalImage');
-            modalImage.src = imageUrl;
-            modal.style.display = 'flex';
-        }
-
-        // 关闭模态框
-        function closeModal() {
-            const modal = document.getElementById('modal');
-            modal.style.display = 'none';
-        }
-    </script>
-</body>
-
-</html>
+       
