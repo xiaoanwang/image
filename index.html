@@ -217,7 +217,7 @@
                     placeholder.textContent = '图片加载失败';
                     container.appendChild(placeholder);
                 };
-                img.onclick = () => openModal(url);
+                img.onclick = () => openModal(url);  // 确保点击图片查看功能
 
                 const actionButtons = document.createElement('div');
                 actionButtons.className = 'action-buttons';
@@ -287,4 +287,20 @@
             });
         }
 
-       
+        // 打开模态框查看图片
+        function openModal(url) {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = url;  // 设置模态框中的图片源
+            modal.style.display = 'flex';  // 显示模态框
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';  // 隐藏模态框
+        }
+    </script>
+</body>
+
+</html>
