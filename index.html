@@ -77,6 +77,22 @@
             cursor: pointer;
         }
 
+        .label-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .label-buttons label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .label-buttons input {
+            margin-right: 5px;
+        }
+
         #loadMore {
             text-align: center;
             margin: 20px 0;
@@ -94,11 +110,19 @@
     <div id="loadMore" style="display: none;">
         <button onclick="loadBatch()">加载更多</button>
     </div>
+    <div style="text-align: center; margin: 20px;">
+        <button onclick="copySelectedUrls()">复制选中图片 URL</button>
+        <button onclick="copyLabeledUrls('A')">复制标注为 A 的图片 URL</button>
+        <button onclick="copyLabeledUrls('B')">复制标注为 B 的图片 URL</button>
+        <button onclick="copyLabeledUrls('C')">复制标注为 C 的图片 URL</button>
+    </div>
 
     <script>
         const imageUrls = [];
         const batchSize = 20; // 每次加载的图片数量
         let currentBatchIndex = 0;
+        const selectedUrls = new Set();
+        const imageLabels = {};
 
         function loadImages() {
             const input = document.getElementById('imageUrls').value;
@@ -124,19 +148,48 @@
                 const actions = document.createElement('div');
                 actions.className = 'actions';
 
-                const copyButton = document.createElement('button');
-                copyButton.textContent = '复制 URL';
-                copyButton.onclick = async () => {
-                    try {
-                        await navigator.clipboard.writeText(imageUrls[i]);
-                        alert('URL 已复制到剪贴板');
-                    } catch {
-                        alert('复制失败');
+                const selectButton = document.createElement('button');
+                selectButton.textContent = '选择';
+                selectButton.onclick = () => {
+                    if (selectedUrls.has(imageUrls[i])) {
+                        selectedUrls.delete(imageUrls[i]);
+                        selectButton.style.backgroundColor = '';
+                    } else {
+                        selectedUrls.add(imageUrls[i]);
+                        selectButton.style.backgroundColor = '#f39c12';
                     }
                 };
+                actions.appendChild(selectButton);
 
-                actions.appendChild(copyButton);
+                const labelButtons = document.createElement('div');
+                labelButtons.className = 'label-buttons';
+
+                ['A', 'B', 'C'].forEach(label => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `${imageUrls[i]}-${label}`;
+                    checkbox.name = 'label';
+                    checkbox.value = label;
+
+                    checkbox.onclick = () => {
+                        imageLabels[imageUrls[i]] = imageLabels[imageUrls[i]] || [];
+                        if (checkbox.checked) {
+                            imageLabels[imageUrls[i]].push(label);
+                        } else {
+                            imageLabels[imageUrls[i]] = imageLabels[imageUrls[i]].filter(l => l !== label);
+                        }
+                    };
+
+                    const labelText = document.createElement('label');
+                    labelText.htmlFor = `${imageUrls[i]}-${label}`;
+                    labelText.textContent = label;
+                    labelText.prepend(checkbox);
+
+                    labelButtons.appendChild(labelText);
+                });
+
                 container.appendChild(actions);
+                container.appendChild(labelButtons);
                 gallery.appendChild(container);
             }
 
@@ -166,6 +219,34 @@
             });
 
             images.forEach(img => observer.observe(img));
+        }
+
+        function copySelectedUrls() {
+            if (selectedUrls.size === 0) {
+                alert('没有选中任何图片');
+                return;
+            }
+
+            const urls = Array.from(selectedUrls).join('\n');
+            navigator.clipboard.writeText(urls).then(() => {
+                alert('选中图片的 URL 已复制到剪贴板');
+            }).catch(() => {
+                alert('复制失败');
+            });
+        }
+
+        function copyLabeledUrls(label) {
+            const labeledUrls = Object.keys(imageLabels).filter(url => imageLabels[url]?.includes(label));
+            if (labeledUrls.length === 0) {
+                alert(`没有标注为 ${label} 的图片`);
+                return;
+            }
+            const urls = labeledUrls.join('\n');
+            navigator.clipboard.writeText(urls).then(() => {
+                alert(`标注为 ${label} 的图片 URL 已复制到剪贴板`);
+            }).catch(() => {
+                alert('复制失败');
+            });
         }
     </script>
 </body>
