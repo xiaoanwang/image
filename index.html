@@ -32,7 +32,6 @@
             font-size: 14px;
             border: 1px solid #ddd;
             border-radius: 15px;
-            box-sizing: border-box;
             background-color: #fff;
             color: #555;
         }
@@ -59,7 +58,6 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             padding: 20px;
-            margin-top: 20px;
         }
 
         .image-container {
@@ -110,6 +108,16 @@
         .action-buttons .copy-button {
             background-color: #28a745;
         }
+
+        .label-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+
+        .label-buttons input {
+            margin-right: 5px;
+        }
     </style>
 </head>
 
@@ -124,15 +132,20 @@
     <div id="gallery"></div>
     <div style="text-align:center; margin-top:20px;">
         <button onclick="copySelectedUrls()">复制选中图片 URL</button>
+        <button onclick="copyLabeledUrls('A')">复制标注为 A 的图片 URL</button>
+        <button onclick="copyLabeledUrls('B')">复制标注为 B 的图片 URL</button>
+        <button onclick="copyLabeledUrls('C')">复制标注为 C 的图片 URL</button>
     </div>
 
     <script>
         const selectedUrls = new Set();
+        const imageLabels = {}; // 用于存储每个图片的分类信息
 
         function displayImages() {
             const gallery = document.getElementById('gallery');
             gallery.innerHTML = '';
             selectedUrls.clear();
+            Object.keys(imageLabels).forEach(key => imageLabels[key] = []); // 重置标签
 
             const urls = document.getElementById('imageUrls').value.split('\n').map(url => url.trim()).filter(url => url);
 
@@ -143,7 +156,6 @@
                 const img = document.createElement('img');
                 img.dataset.src = url; // 懒加载
                 img.alt = '加载失败';
-
                 img.onload = () => img.classList.add('loaded');
                 img.onerror = () => {
                     img.style.display = 'none';
@@ -180,10 +192,36 @@
                     }
                 };
 
+                const labelButtons = document.createElement('div');
+                labelButtons.className = 'label-buttons';
+
+                ['A', 'B', 'C'].forEach(label => {
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `${url}-${label}`;
+                    checkbox.name = 'label';
+                    checkbox.value = label;
+                    checkbox.onclick = () => {
+                        imageLabels[url] = imageLabels[url] || [];
+                        if (checkbox.checked) {
+                            imageLabels[url].push(label);
+                        } else {
+                            imageLabels[url] = imageLabels[url].filter(item => item !== label);
+                        }
+                    };
+
+                    const labelText = document.createElement('label');
+                    labelText.htmlFor = `${url}-${label}`;
+                    labelText.textContent = label;
+                    labelButtons.appendChild(checkbox);
+                    labelButtons.appendChild(labelText);
+                });
+
                 actionButtons.appendChild(selectButton);
                 actionButtons.appendChild(copyButton);
                 container.appendChild(img);
                 container.appendChild(actionButtons);
+                container.appendChild(labelButtons);
                 gallery.appendChild(container);
             });
 
@@ -218,6 +256,20 @@
             const urls = Array.from(selectedUrls).join('\n');
             navigator.clipboard.writeText(urls).then(() => {
                 alert('选中图片的 URL 已复制到剪贴板');
+            }).catch(() => {
+                alert('复制失败');
+            });
+        }
+
+        function copyLabeledUrls(label) {
+            const labeledUrls = Object.keys(imageLabels).filter(url => imageLabels[url]?.includes(label));
+            if (labeledUrls.length === 0) {
+                alert(`没有标注为 ${label} 的图片`);
+                return;
+            }
+            const urls = labeledUrls.join('\n');
+            navigator.clipboard.writeText(urls).then(() => {
+                alert(`标注为 ${label} 的图片 URL 已复制到剪贴板`);
             }).catch(() => {
                 alert('复制失败');
             });
