@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>优化后的批量展示图片</title>
+    <title>批量展示图片</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -35,12 +35,6 @@
             box-sizing: border-box;
             background-color: #fff;
             color: #555;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #6e7dff;
-            box-shadow: 0 0 8px rgba(110, 125, 255, 0.5);
         }
 
         button {
@@ -89,11 +83,38 @@
         .image-container img.loaded {
             opacity: 1;
         }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+        }
+
+        .action-buttons button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 5px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-buttons .select-button {
+            background-color: #007bff;
+        }
+
+        .action-buttons .select-button.selected {
+            background-color: #f39c12;
+        }
+
+        .action-buttons .copy-button {
+            background-color: #28a745;
+        }
     </style>
 </head>
 
 <body>
-    <h1>优化后的批量展示图片</h1>
+    <h1>批量展示图片</h1>
     <div style="text-align:center;">
         <textarea id="imageUrls" placeholder="输入图片 URL，每行一个"></textarea>
         <div>
@@ -101,12 +122,17 @@
         </div>
     </div>
     <div id="gallery"></div>
+    <div style="text-align:center; margin-top:20px;">
+        <button onclick="copySelectedUrls()">复制选中图片 URL</button>
+    </div>
 
     <script>
-        // 展示图片的逻辑
+        const selectedUrls = new Set();
+
         function displayImages() {
             const gallery = document.getElementById('gallery');
-            gallery.innerHTML = ''; // 清空之前的内容
+            gallery.innerHTML = '';
+            selectedUrls.clear();
 
             const urls = document.getElementById('imageUrls').value.split('\n').map(url => url.trim()).filter(url => url);
 
@@ -115,15 +141,10 @@
                 container.className = 'image-container';
 
                 const img = document.createElement('img');
-                img.dataset.src = url; // 设置懒加载的真实 URL
+                img.dataset.src = url; // 懒加载
                 img.alt = '加载失败';
 
-                // 占位符加载完成后替换
-                img.onload = () => {
-                    img.classList.add('loaded');
-                };
-
-                // 图片加载失败处理
+                img.onload = () => img.classList.add('loaded');
                 img.onerror = () => {
                     img.style.display = 'none';
                     const placeholder = document.createElement('div');
@@ -131,24 +152,53 @@
                     container.appendChild(placeholder);
                 };
 
+                const actionButtons = document.createElement('div');
+                actionButtons.className = 'action-buttons';
+
+                const selectButton = document.createElement('button');
+                selectButton.textContent = '选择';
+                selectButton.className = 'select-button';
+                selectButton.onclick = () => {
+                    if (selectedUrls.has(url)) {
+                        selectedUrls.delete(url);
+                        selectButton.classList.remove('selected');
+                    } else {
+                        selectedUrls.add(url);
+                        selectButton.classList.add('selected');
+                    }
+                };
+
+                const copyButton = document.createElement('button');
+                copyButton.textContent = '复制 URL';
+                copyButton.className = 'copy-button';
+                copyButton.onclick = async () => {
+                    try {
+                        await navigator.clipboard.writeText(url);
+                        alert('URL 已复制到剪贴板');
+                    } catch {
+                        alert('复制失败');
+                    }
+                };
+
+                actionButtons.appendChild(selectButton);
+                actionButtons.appendChild(copyButton);
                 container.appendChild(img);
+                container.appendChild(actionButtons);
                 gallery.appendChild(container);
             });
 
-            // 激活懒加载
             activateLazyLoad();
         }
 
-        // 懒加载逻辑
         function activateLazyLoad() {
             const lazyImages = document.querySelectorAll('#gallery img');
 
-            const lazyLoad = function () {
+            const lazyLoad = () => {
                 lazyImages.forEach(image => {
                     if (image.getBoundingClientRect().top < window.innerHeight && image.getBoundingClientRect().bottom > 0) {
                         if (image.dataset.src) {
-                            image.src = image.dataset.src; // 设置真实 URL
-                            image.removeAttribute('data-src'); // 清理属性
+                            image.src = image.dataset.src;
+                            image.removeAttribute('data-src');
                         }
                     }
                 });
@@ -157,9 +207,20 @@
             document.addEventListener('scroll', lazyLoad);
             window.addEventListener('resize', lazyLoad);
             window.addEventListener('orientationchange', lazyLoad);
-
-            // 初始触发一次加载
             lazyLoad();
+        }
+
+        function copySelectedUrls() {
+            if (selectedUrls.size === 0) {
+                alert('没有选中任何图片');
+                return;
+            }
+            const urls = Array.from(selectedUrls).join('\n');
+            navigator.clipboard.writeText(urls).then(() => {
+                alert('选中图片的 URL 已复制到剪贴板');
+            }).catch(() => {
+                alert('复制失败');
+            });
         }
     </script>
 </body>
