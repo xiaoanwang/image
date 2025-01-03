@@ -4,79 +4,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>优化后的图片展示</title>
+    <title>批量展示图片</title>
     <style>
+        /* 基本样式 */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f7f7f7;
+            background: linear-gradient(45deg, #A1B4D2, #c4d6ea);
             color: #333;
+            line-height: 1.6;
+            font-size: 16px;
         }
 
         h1 {
             text-align: center;
-            margin: 20px 0;
+            margin: 40px 0;
+            color: #333;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         textarea {
-            width: 90%;
+            width: 100%;
             height: 120px;
-            margin: 10px auto;
-            display: block;
-            padding: 10px;
-            font-size: 16px;
+            margin-bottom: 15px;
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            box-sizing: border-box;
+            background-color: #fff;
+            color: #555;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #6e7dff;
+            box-shadow: 0 0 8px rgba(110, 125, 255, 0.5);
         }
 
         button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 12px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 25px;
+            background: #4b6e8e;
+            color: white;
             cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        button:hover {
+            background: #3a567b;
+            transform: translateY(-3px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* 图片展示区域 */
         #gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            padding: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            margin-top: 20px;
         }
 
         .image-container {
             position: relative;
+            background-color: #fff;
+            border-radius: 15px;
             overflow: hidden;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-container:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
 
         .image-container img {
             width: 100%;
-            height: 200px;
+            height: 300px;
             object-fit: cover;
-            display: block;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
+            border-bottom: 5px solid #f1f1f1;
+            border-radius: 10px 10px 0 0;
+            transition: transform 0.3s ease;
         }
 
-        .image-container img.loaded {
-            opacity: 1;
+        .image-container:hover img {
+            transform: scale(1.05);
         }
 
-        .actions {
+        .action-buttons {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             padding: 10px;
-            background: #f9f9f9;
-            border-top: 1px solid #ddd;
         }
 
-        .actions button {
-            padding: 5px 10px;
+        .action-buttons button {
+            background-color: #28a745;
             font-size: 14px;
-            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 5px;
+            color: white;
+            border: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
 
+        .action-buttons button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .selected {
+            background-color: #f39c12 !important;
+        }
+
+        /* 标签按钮样式 */
         .label-buttons {
             display: flex;
             justify-content: space-around;
@@ -87,30 +140,29 @@
             display: flex;
             align-items: center;
             cursor: pointer;
+            font-size: 18px;
+            margin: 0 10px;
         }
 
         .label-buttons input {
-            margin-right: 5px;
-        }
-
-        #loadMore {
-            text-align: center;
-            margin: 20px 0;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
         }
     </style>
 </head>
 
 <body>
-    <h1>优化后的图片展示</h1>
-    <textarea id="imageUrls" placeholder="输入图片 URL，每行一个"></textarea>
-    <div style="text-align: center;">
-        <button onclick="loadImages()">加载图片</button>
+    <h1>批量展示图片</h1>
+    <div style="text-align:center;">
+        <textarea id="imageUrls" placeholder="输入图片 URL，每行一个"></textarea>
+        <div>
+            <button onclick="displayImages()">展示图片</button>
+        </div>
     </div>
     <div id="gallery"></div>
-    <div id="loadMore" style="display: none;">
-        <button onclick="loadBatch()">加载更多</button>
-    </div>
-    <div style="text-align: center; margin: 20px;">
+
+    <div class="button-container" style="text-align:center; margin-top:20px;">
         <button onclick="copySelectedUrls()">复制选中图片 URL</button>
         <button onclick="copyLabeledUrls('A')">复制标注为 A 的图片 URL</button>
         <button onclick="copyLabeledUrls('B')">复制标注为 B 的图片 URL</button>
@@ -118,123 +170,84 @@
     </div>
 
     <script>
-        const imageUrls = [];
-        const batchSize = 20; // 每次加载的图片数量
-        let currentBatchIndex = 0;
         const selectedUrls = new Set();
         const imageLabels = {};
 
-        function loadImages() {
-            const input = document.getElementById('imageUrls').value;
-            imageUrls.push(...input.split('\n').map(url => url.trim()).filter(url => url));
-            document.getElementById('gallery').innerHTML = '';
-            currentBatchIndex = 0;
-            loadBatch();
-        }
-
-        function loadBatch() {
+        // 展示图片
+        function displayImages() {
             const gallery = document.getElementById('gallery');
-            const endIndex = Math.min(currentBatchIndex + batchSize, imageUrls.length);
+            gallery.innerHTML = '';
+            selectedUrls.clear();
+            Object.keys(imageLabels).forEach(key => delete imageLabels[key]);
 
-            for (let i = currentBatchIndex; i < endIndex; i++) {
+            const urls = document.getElementById('imageUrls').value.split('\n').map(url => url.trim()).filter(url => url);
+
+            urls.forEach(url => {
                 const container = document.createElement('div');
                 container.className = 'image-container';
 
                 const img = document.createElement('img');
-                img.dataset.src = imageUrls[i];
+                img.src = url;
                 img.alt = '加载失败';
-                container.appendChild(img);
 
-                const actions = document.createElement('div');
-                actions.className = 'actions';
+                const actionButtons = document.createElement('div');
+                actionButtons.className = 'action-buttons';
 
                 const selectButton = document.createElement('button');
                 selectButton.textContent = '选择';
                 selectButton.onclick = () => {
-                    if (selectedUrls.has(imageUrls[i])) {
-                        selectedUrls.delete(imageUrls[i]);
-                        selectButton.style.backgroundColor = '';
+                    if (selectedUrls.has(url)) {
+                        selectedUrls.delete(url);
+                        selectButton.classList.remove('selected');
                     } else {
-                        selectedUrls.add(imageUrls[i]);
-                        selectButton.style.backgroundColor = '#f39c12';
+                        selectedUrls.add(url);
+                        selectButton.classList.add('selected');
                     }
                 };
-                actions.appendChild(selectButton);
 
+                actionButtons.appendChild(selectButton);
+                container.appendChild(img);
+                container.appendChild(actionButtons);
+
+                // 标签按钮 A, B, C
                 const labelButtons = document.createElement('div');
                 labelButtons.className = 'label-buttons';
-
                 ['A', 'B', 'C'].forEach(label => {
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
-                    checkbox.id = `${imageUrls[i]}-${label}`;
-                    checkbox.name = 'label';
+                    checkbox.id = `${url}-${label}`;
                     checkbox.value = label;
-
                     checkbox.onclick = () => {
-                        imageLabels[imageUrls[i]] = imageLabels[imageUrls[i]] || [];
+                        imageLabels[url] = imageLabels[url] || [];
                         if (checkbox.checked) {
-                            imageLabels[imageUrls[i]].push(label);
+                            imageLabels[url].push(label);
                         } else {
-                            imageLabels[imageUrls[i]] = imageLabels[imageUrls[i]].filter(l => l !== label);
+                            imageLabels[url] = imageLabels[url].filter(item => item !== label);
                         }
                     };
-
                     const labelText = document.createElement('label');
-                    labelText.htmlFor = `${imageUrls[i]}-${label}`;
+                    labelText.htmlFor = `${url}-${label}`;
                     labelText.textContent = label;
-                    labelText.prepend(checkbox);
-
+                    labelButtons.appendChild(checkbox);
                     labelButtons.appendChild(labelText);
                 });
 
-                container.appendChild(actions);
                 container.appendChild(labelButtons);
                 gallery.appendChild(container);
-            }
-
-            currentBatchIndex = endIndex;
-
-            if (currentBatchIndex < imageUrls.length) {
-                document.getElementById('loadMore').style.display = 'block';
-            } else {
-                document.getElementById('loadMore').style.display = 'none';
-            }
-
-            activateLazyLoad();
-        }
-
-        function activateLazyLoad() {
-            const images = document.querySelectorAll('img[data-src]');
-            const observer = new IntersectionObserver((entries, obs) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        img.src = img.dataset.src;
-                        img.onload = () => img.classList.add('loaded');
-                        img.removeAttribute('data-src');
-                        obs.unobserve(img);
-                    }
-                });
             });
-
-            images.forEach(img => observer.observe(img));
         }
 
+        // 复制选中图片 URL
         function copySelectedUrls() {
             if (selectedUrls.size === 0) {
                 alert('没有选中任何图片');
                 return;
             }
-
             const urls = Array.from(selectedUrls).join('\n');
-            navigator.clipboard.writeText(urls).then(() => {
-                alert('选中图片的 URL 已复制到剪贴板');
-            }).catch(() => {
-                alert('复制失败');
-            });
+            navigator.clipboard.writeText(urls).then(() => alert('选中图片的 URL 已复制到剪贴板'));
         }
 
+        // 复制标注为 A, B, C 的图片 URL
         function copyLabeledUrls(label) {
             const labeledUrls = Object.keys(imageLabels).filter(url => imageLabels[url]?.includes(label));
             if (labeledUrls.length === 0) {
@@ -242,11 +255,7 @@
                 return;
             }
             const urls = labeledUrls.join('\n');
-            navigator.clipboard.writeText(urls).then(() => {
-                alert(`标注为 ${label} 的图片 URL 已复制到剪贴板`);
-            }).catch(() => {
-                alert('复制失败');
-            });
+            navigator.clipboard.writeText(urls).then(() => alert(`标注为 ${label} 的图片 URL 已复制到剪贴板`));
         }
     </script>
 </body>
