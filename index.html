@@ -101,17 +101,19 @@
             cursor: pointer;
         }
 
+        /* 放大图片时使用 transform 进行缩放，避免重排 */
         .image-container img.fullscreen {
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
+            transform: translate(-50%, -50%) scale(1.2); /* 使用 scale 进行放大 */
+            width: auto; /* 删除宽度的固定值 */
             height: auto;
             object-fit: contain;
             background-color: rgba(0, 0, 0, 0.9);
             z-index: 1000;
             border-radius: 0;
+            will-change: transform; /* 提前告诉浏览器可能会发生 transform 改变 */
         }
 
         .action-buttons {
