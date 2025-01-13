@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -205,6 +204,7 @@
                 const img = document.createElement('img');
                 img.src = url;
                 img.alt = '加载失败';
+                img.loading = 'lazy'; // 启用懒加载
 
                 img.onclick = () => {
                     openFullscreenImage(url);
