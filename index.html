@@ -101,19 +101,24 @@
             cursor: pointer;
         }
 
-        /* 放大图片时使用 transform 进行缩放，避免重排 */
-        .image-container img.fullscreen {
+        .fullscreen-image {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(1.2); /* 使用 scale 进行放大 */
-            width: auto; /* 删除宽度的固定值 */
-            height: auto;
-            object-fit: contain;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background-color: rgba(0, 0, 0, 0.9);
             z-index: 1000;
-            border-radius: 0;
-            will-change: transform; /* 提前告诉浏览器可能会发生 transform 改变 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .fullscreen-image img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
         }
 
         .action-buttons {
@@ -202,12 +207,7 @@
                 img.alt = '加载失败';
 
                 img.onclick = () => {
-                    if (img.classList.contains('fullscreen')) {
-                        img.classList.remove('fullscreen');
-                    } else {
-                        document.querySelectorAll('.fullscreen').forEach(fullImg => fullImg.classList.remove('fullscreen'));
-                        img.classList.add('fullscreen');
-                    }
+                    openFullscreenImage(url);
                 };
 
                 const actionButtons = document.createElement('div');
@@ -254,6 +254,21 @@
                 container.appendChild(labelButtons);
                 gallery.appendChild(container);
             });
+        }
+
+        function openFullscreenImage(url) {
+            const fullscreenDiv = document.createElement('div');
+            fullscreenDiv.className = 'fullscreen-image';
+
+            const img = document.createElement('img');
+            img.src = url;
+            fullscreenDiv.appendChild(img);
+
+            fullscreenDiv.onclick = () => {
+                document.body.removeChild(fullscreenDiv);
+            };
+
+            document.body.appendChild(fullscreenDiv);
         }
 
         function copySelectedUrls() {
