@@ -141,11 +141,7 @@
             transform: translateY(-2px);
         }
 
-        .selected {
-            background-color: #f39c12 !important;
-        }
-
-        /* 标签按钮样式 */
+        /* 单选按钮容器样式 */
         .label-buttons {
             display: flex;
             justify-content: space-around;
@@ -183,6 +179,7 @@
         <button onclick="copyLabeledUrls('A')">复制标注为 A 的图片 URL</button>
         <button onclick="copyLabeledUrls('B')">复制标注为 B 的图片 URL</button>
         <button onclick="copyLabeledUrls('C')">复制标注为 C 的图片 URL</button>
+        <button onclick="copyLabeledUrls('D')">复制标注为 D 的图片 URL</button>
     </div>
 
     <script>
@@ -231,23 +228,19 @@
 
                 const labelButtons = document.createElement('div');
                 labelButtons.className = 'label-buttons';
-                ['A', 'B', 'C'].forEach(label => {
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = `${url}-${label}`;
-                    checkbox.value = label;
-                    checkbox.onclick = () => {
-                        imageLabels[url] = imageLabels[url] || [];
-                        if (checkbox.checked) {
-                            imageLabels[url].push(label);
-                        } else {
-                            imageLabels[url] = imageLabels[url].filter(item => item !== label);
-                        }
+                ['A', 'B', 'C', 'D'].forEach(label => {
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = `${url}-label`; // Same name for all options, so only one can be selected
+                    radio.id = `${url}-${label}`;
+                    radio.value = label;
+                    radio.onclick = () => {
+                        imageLabels[url] = label;
                     };
                     const labelText = document.createElement('label');
                     labelText.htmlFor = `${url}-${label}`;
                     labelText.textContent = label;
-                    labelButtons.appendChild(checkbox);
+                    labelButtons.appendChild(radio);
                     labelButtons.appendChild(labelText);
                 });
 
@@ -281,7 +274,7 @@
         }
 
         function copyLabeledUrls(label) {
-            const labeledUrls = Object.keys(imageLabels).filter(url => imageLabels[url]?.includes(label));
+            const labeledUrls = Object.keys(imageLabels).filter(url => imageLabels[url] === label);
             if (labeledUrls.length === 0) {
                 alert(`没有标注为 ${label} 的图片`);
                 return;
