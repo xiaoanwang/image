@@ -39,12 +39,6 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        textarea:focus {
-            outline: none;
-            border-color: #6e7dff;
-            box-shadow: 0 0 8px rgba(110, 125, 255, 0.5);
-        }
-
         button {
             padding: 12px 20px;
             font-size: 14px;
@@ -185,34 +179,29 @@
     <script>
         const selectedUrls = new Set();
         const imageLabels = {};
-        const gallery = document.getElementById('gallery');
-        const observer = new IntersectionObserver(handleImageLoad, {
-            rootMargin: '200px', // 图片即将出现在视口时加载
-            threshold: 0
-        });
-
-        function handleImageLoad(entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src; // 延迟加载
-                    observer.unobserve(img);
-                }
-            });
-        }
 
         function displayImages() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+            selectedUrls.clear();
+            Object.keys(imageLabels).forEach(key => delete imageLabels[key]);
+
             const urls = document.getElementById('imageUrls').value.split('\n').map(url => url.trim()).filter(url => url);
-            const fragment = document.createDocumentFragment(); // 使用 DocumentFragment 批量插入
+
+            const fragment = document.createDocumentFragment(); // 使用文档片段提升性能
 
             urls.forEach(url => {
                 const container = document.createElement('div');
                 container.className = 'image-container';
 
                 const img = document.createElement('img');
+                img.src = url;
                 img.alt = '加载失败';
                 img.loading = 'lazy'; // 启用懒加载
-                img.dataset.src = url; // 使用 data-src 进行延迟加载
+
+                img.onclick = () => {
+                    openFullscreenImage(url); // 点击图片放大
+                };
 
                 const actionButtons = document.createElement('div');
                 actionButtons.className = 'action-buttons';
@@ -238,7 +227,7 @@
                 ['A', 'B', 'C', 'D'].forEach(label => {
                     const radio = document.createElement('input');
                     radio.type = 'radio';
-                    radio.name = `${url}-label`;
+                    radio.name = `${url}-label`; // Same name for all options, so only one can be selected
                     radio.id = `${url}-${label}`;
                     radio.value = label;
                     radio.onclick = () => {
@@ -253,12 +242,9 @@
 
                 container.appendChild(labelButtons);
                 fragment.appendChild(container);
-
-                // 监控图片
-                observer.observe(img);
             });
 
-            gallery.appendChild(fragment);
+            gallery.appendChild(fragment); // 一次性添加所有图片
         }
 
         function openFullscreenImage(url) {
@@ -278,11 +264,11 @@
 
         function copySelectedUrls() {
             if (selectedUrls.size === 0) {
-                alert('没有选中任何图片');
+                alert('没有选中的图片');
                 return;
             }
             const urls = Array.from(selectedUrls).join('\n');
-            navigator.clipboard.writeText(urls).then(() => alert('选中图片的 URL 已复制到剪贴板'));
+            copyToClipboard(urls);
         }
 
         function copyLabeledUrls(label) {
@@ -292,9 +278,18 @@
                 return;
             }
             const urls = labeledUrls.join('\n');
-            navigator.clipboard.writeText(urls).then(() => alert(`标注为 ${label} 的图片 URL 已复制到剪贴板`));
+            copyToClipboard(urls);
+        }
+
+        function copyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('已复制到剪贴板');
         }
     </script>
 </body>
-
 </html>
