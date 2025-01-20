@@ -185,27 +185,34 @@
     <script>
         const selectedUrls = new Set();
         const imageLabels = {};
+        const gallery = document.getElementById('gallery');
+        const observer = new IntersectionObserver(handleImageLoad, {
+            rootMargin: '200px', // 图片即将出现在视口时加载
+            threshold: 0
+        });
+
+        function handleImageLoad(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src; // 延迟加载
+                    observer.unobserve(img);
+                }
+            });
+        }
 
         function displayImages() {
-            const gallery = document.getElementById('gallery');
-            gallery.innerHTML = '';
-            selectedUrls.clear();
-            Object.keys(imageLabels).forEach(key => delete imageLabels[key]);
-
             const urls = document.getElementById('imageUrls').value.split('\n').map(url => url.trim()).filter(url => url);
+            const fragment = document.createDocumentFragment(); // 使用 DocumentFragment 批量插入
 
             urls.forEach(url => {
                 const container = document.createElement('div');
                 container.className = 'image-container';
 
                 const img = document.createElement('img');
-                img.src = url;
                 img.alt = '加载失败';
                 img.loading = 'lazy'; // 启用懒加载
-
-                img.onclick = () => {
-                    openFullscreenImage(url);
-                };
+                img.dataset.src = url; // 使用 data-src 进行延迟加载
 
                 const actionButtons = document.createElement('div');
                 actionButtons.className = 'action-buttons';
@@ -231,7 +238,7 @@
                 ['A', 'B', 'C', 'D'].forEach(label => {
                     const radio = document.createElement('input');
                     radio.type = 'radio';
-                    radio.name = `${url}-label`; // Same name for all options, so only one can be selected
+                    radio.name = `${url}-label`;
                     radio.id = `${url}-${label}`;
                     radio.value = label;
                     radio.onclick = () => {
@@ -245,8 +252,13 @@
                 });
 
                 container.appendChild(labelButtons);
-                gallery.appendChild(container);
+                fragment.appendChild(container);
+
+                // 监控图片
+                observer.observe(img);
             });
+
+            gallery.appendChild(fragment);
         }
 
         function openFullscreenImage(url) {
