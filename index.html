@@ -174,7 +174,10 @@
 	<div id="gallery"></div>
 
 	<div style="text-align: center; margin-top: 20px;">
-		<button onclick="copySelectedUrls()">批量拷贝标注URL</button>
+		<button onclick="copySelectedUrls('A')">复制A类标注URL</button>
+		<button onclick="copySelectedUrls('B')">复制B类标注URL</button>
+		<button onclick="copySelectedUrls('C')">复制C类标注URL</button>
+		<button onclick="downloadSelectedImages()">批量下载</button>
 	</div>
 
 	<!-- 模态框 -->
@@ -185,7 +188,7 @@
 
 	<script>
 		let selectedUrls = new Set();
-		let labeledUrls = {}; // 存储每张图片的标注
+		let labeledUrls = { A: [], B: [], C: [] }; // 存储每类标注的URL
 
 		function displayImages() {
 			const urls = getInputUrls();
@@ -226,15 +229,15 @@
 
 				// 添加ABC标注按钮
 				const labelBtnA = document.createElement('button');
-				labelBtnA.textContent = 'A类';
+				labelBtnA.textContent = '标注A类';
 				labelBtnA.onclick = () => labelImage(url, 'A');
 
 				const labelBtnB = document.createElement('button');
-				labelBtnB.textContent = 'B类';
+				labelBtnB.textContent = '标注B类';
 				labelBtnB.onclick = () => labelImage(url, 'B');
 
 				const labelBtnC = document.createElement('button');
-				labelBtnC.textContent = 'C类';
+				labelBtnC.textContent = '标注C类';
 				labelBtnC.onclick = () => labelImage(url, 'C');
 
 				actions.append(labelBtnA, labelBtnB, labelBtnC);
@@ -244,17 +247,20 @@
 		}
 
 		function labelImage(url, label) {
-			labeledUrls[url] = label;
+			labeledUrls[label].push(url);
 			alert(`已为图片标注为: ${label}`);
 		}
 
-		function copySelectedUrls() {
-			const labelUrls = Object.keys(labeledUrls).map(url => {
-				const label = labeledUrls[url] || '未标注';
-				return `${url}?label=${label}`;
-			}).join('\n');
+		function copySelectedUrls(label) {
+			const labelUrls = labeledUrls[label].join('\n');
 			navigator.clipboard.writeText(labelUrls);
-			alert('选中标注的 URL 已复制！');
+			alert(`${label}类的标注URL已复制！`);
+		}
+
+		function downloadSelectedImages() {
+			// 假设图片下载逻辑（这里只是个简单示例，实际需要根据文件下载功能做调整）
+			const urls = Array.from(selectedUrls).join('\n');
+			alert(`已选中图片 URL: \n${urls}`);
 		}
 
 		function openModal(url) {
