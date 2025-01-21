@@ -263,20 +263,35 @@
             }
         }
 
-        function openModal(imageUrl) {
-            const modal = document.getElementById('modal');
-            const modalImage = document.getElementById('modalImage');
-            modalImage.src = imageUrl;
-            modal.style.display = 'flex';
-            modalImage.onclick = () => modalImage.classList.toggle('zoomed');
-        }
+       function openModal(imageUrl) {
+    const modal = document.getElementById('modal');
+    const modalImage = document.getElementById('modalImage');
+    modalImage.src = imageUrl;
+    modal.style.display = 'flex';
 
-        function closeModal() {
-            const modal = document.getElementById('modal');
-            const modalImage = document.getElementById('modalImage');
-            modal.style.display = 'none';
-            modalImage.classList.remove('zoomed');
-        }
+    modalImage.onclick = () => modalImage.classList.toggle('zoomed');
+
+    // 监听键盘事件
+    document.addEventListener('keydown', handleEscapeKey);
+}
+
+function closeModal() {
+    const modal = document.getElementById('modal');
+    const modalImage = document.getElementById('modalImage');
+    modal.style.display = 'none';
+    modalImage.classList.remove('zoomed');
+
+    // 移除键盘事件监听器
+    document.removeEventListener('keydown', handleEscapeKey);
+}
+
+// 处理键盘事件的函数
+function handleEscapeKey(event) {
+    if (event.key === 'Escape') {
+        closeModal();
+    }
+}
+
     </script>
 </body>
 
