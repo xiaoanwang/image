@@ -152,16 +152,19 @@
         let selectedUrls = new Set(); // 存储选中的图片 URL
         let annotations = {}; // 存储每张图片的标注状态
 
-        // 展示所有图片
-        function displayImages() {
-            displayImagesWithUrls(getInputUrls());
-        }
+       function displayImages() {
+    const urls = getInputUrls();
+    console.log('展示图片 URLs:', urls); // 调试日志
+    displayImagesWithUrls(urls);
+}
 
-        // 去重展示图片
-        function displayUniqueImages() {
-            const urls = getInputUrls();
-            const uniqueUrls = deduplicateUrls(urls);
-            displayImagesWithUrls(uniqueUrls);
+function displayUniqueImages() {
+    const urls = getInputUrls();
+    const uniqueUrls = deduplicateUrls(urls);
+    console.log('去重后的 URLs:', uniqueUrls); // 调试日志
+    displayImagesWithUrls(uniqueUrls);
+
+
         }
 
         // 获取输入的 URL 列表
