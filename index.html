@@ -251,25 +251,14 @@
 		}
 
 		function labelImage(url, label, button) {
+			console.log(`标注图片: ${url} 为 ${label}`); // 调试用，查看是否触发事件
 			if (!labeledUrls[label].includes(url)) {
 				labeledUrls[label].push(url);
 				button.classList.add('selected'); // 给按钮添加选中样式
 			} else {
-				button.classList.remove('selected'); // 取消选中样式
-				labeledUrls[label] = labeledUrls[label].filter(u => u !== url);
+				button.classList.remove('selected'); // 取消选中
+				labeledUrls[label] = labeledUrls[label].filter(item => item !== url);
 			}
-		}
-
-		function copySelectedUrls(label) {
-			const labelUrls = labeledUrls[label].join('\n');
-			navigator.clipboard.writeText(labelUrls);
-			alert(`${label}类的标注URL已复制！`);
-		}
-
-		function downloadSelectedImages() {
-			// 假设图片下载逻辑（这里只是个简单示例，实际需要根据文件下载功能做调整）
-			const urls = Array.from(selectedUrls).join('\n');
-			alert(`已选中图片 URL: \n${urls}`);
 		}
 
 		function openModal(url) {
@@ -283,12 +272,15 @@
 			document.getElementById('modal').style.display = 'none';
 		}
 
-		// Esc键退出大图模式
-		document.addEventListener('keydown', function (e) {
-			if (e.key === 'Escape') {
-				closeModal();
-			}
-		});
+		function copySelectedUrls(label) {
+			const urls = labeledUrls[label].join('\n');
+			navigator.clipboard.writeText(urls);
+			alert(`${label}类标注的 URL 已复制！`);
+		}
+
+		function downloadSelectedImages() {
+			alert("批量下载功能待实现。");
+		}
 	</script>
 </body>
 
