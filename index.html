@@ -124,6 +124,10 @@
 			background: linear-gradient(90deg, #64b5f6, #2196f3);
 		}
 
+		.action-buttons button.selected {
+			background-color: #4caf50; /* 选中后的绿色背景 */
+		}
+
 		/* 模态框样式 */
 		.modal {
 			display: none;
@@ -230,15 +234,15 @@
 				// 添加ABC标注按钮
 				const labelBtnA = document.createElement('button');
 				labelBtnA.textContent = '标注A类';
-				labelBtnA.onclick = () => labelImage(url, 'A');
+				labelBtnA.onclick = () => labelImage(url, 'A', labelBtnA);
 
 				const labelBtnB = document.createElement('button');
 				labelBtnB.textContent = '标注B类';
-				labelBtnB.onclick = () => labelImage(url, 'B');
+				labelBtnB.onclick = () => labelImage(url, 'B', labelBtnB);
 
 				const labelBtnC = document.createElement('button');
 				labelBtnC.textContent = '标注C类';
-				labelBtnC.onclick = () => labelImage(url, 'C');
+				labelBtnC.onclick = () => labelImage(url, 'C', labelBtnC);
 
 				actions.append(labelBtnA, labelBtnB, labelBtnC);
 				container.append(img, actions);
@@ -246,9 +250,14 @@
 			});
 		}
 
-		function labelImage(url, label) {
-			labeledUrls[label].push(url);
-			alert(`已为图片标注为: ${label}`);
+		function labelImage(url, label, button) {
+			if (!labeledUrls[label].includes(url)) {
+				labeledUrls[label].push(url);
+				button.classList.add('selected'); // 给按钮添加选中样式
+			} else {
+				button.classList.remove('selected'); // 取消选中样式
+				labeledUrls[label] = labeledUrls[label].filter(u => u !== url);
+			}
 		}
 
 		function copySelectedUrls(label) {
