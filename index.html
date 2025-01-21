@@ -85,10 +85,6 @@
             background-color: #0056b3;
         }
 
-        .annotation-buttons button {
-            margin: 0 5px;
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -134,29 +130,27 @@
     <div>
         <button id="displayImagesBtn">展示图片</button>
         <button id="displayUniqueImagesBtn">去重展示</button>
-        <button onclick="copySelectedUrls()">批量拷贝</button>
-        <button onclick="downloadSelectedImages()">批量下载</button>
-        <button onclick="copyAnnotatedUrls('A')">复制标注为 A 的 URL</button>
-        <button onclick="copyAnnotatedUrls('B')">复制标注为 B 的 URL</button>
-        <button onclick="copyAnnotatedUrls('C')">复制标注为 C 的 URL</button>
+        <button id="copySelectedUrlsBtn">批量拷贝</button>
+        <button id="downloadSelectedImagesBtn">批量下载</button>
+        <button id="copyAnnotatedUrlsABtn">复制标注为 A 的 URL</button>
+        <button id="copyAnnotatedUrlsBBtn">复制标注为 B 的 URL</button>
+        <button id="copyAnnotatedUrlsCBtn">复制标注为 C 的 URL</button>
     </div>
     <div id="gallery"></div>
 
     <!-- 模态框 -->
     <div class="modal" id="modal">
-        <span class="modal-close" onclick="closeModal()">×</span>
+        <span class="modal-close" id="modalClose">×</span>
         <img id="modalImage" src="" alt="放大图片">
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            let selectedUrls = new Set(); // 存储选中的图片 URL
             let annotations = {}; // 存储每张图片的标注状态
 
             // 展示所有图片
             function displayImages() {
                 const urls = getInputUrls();
-                console.log('展示图片 URLs:', urls); // 调试日志
                 displayImagesWithUrls(urls);
             }
 
@@ -164,7 +158,6 @@
             function displayUniqueImages() {
                 const urls = getInputUrls();
                 const uniqueUrls = deduplicateUrls(urls);
-                console.log('去重后的 URLs:', uniqueUrls); // 调试日志
                 displayImagesWithUrls(uniqueUrls);
             }
 
@@ -197,7 +190,6 @@
             function displayImagesWithUrls(urls) {
                 const gallery = document.getElementById('gallery');
                 gallery.innerHTML = ''; // 清空之前的内容
-                selectedUrls.clear(); // 清空已选择的 URL
                 annotations = {}; // 清空标注记录
 
                 urls.forEach(url => {
@@ -267,6 +259,7 @@
                 }
             }
 
+            // 打开模态框
             function openModal(imageUrl) {
                 const modal = document.getElementById('modal');
                 const modalImage = document.getElementById('modalImage');
@@ -279,6 +272,7 @@
                 document.addEventListener('keydown', handleEscapeKey);
             }
 
+            // 关闭模态框
             function closeModal() {
                 const modal = document.getElementById('modal');
                 const modalImage = document.getElementById('modalImage');
@@ -299,6 +293,10 @@
             // 绑定按钮点击事件
             document.getElementById('displayImagesBtn').addEventListener('click', displayImages);
             document.getElementById('displayUniqueImagesBtn').addEventListener('click', displayUniqueImages);
+            document.getElementById('copyAnnotatedUrlsABtn').addEventListener('click', () => copyAnnotatedUrls('A'));
+            document.getElementById('copyAnnotatedUrlsBBtn').addEventListener('click', () => copyAnnotatedUrls('B'));
+            document.getElementById('copyAnnotatedUrlsCBtn').addEventListener('click', () => copyAnnotatedUrls('C'));
+            document.getElementById('modalClose').addEventListener('click', closeModal);
         });
     </script>
 </body>
