@@ -170,10 +170,12 @@
 	<div style="text-align: center;">
 		<button onclick="displayImages()">展示图片</button>
 		<button onclick="displayUniqueImages()">去重展示</button>
-		<button onclick="copySelectedUrls()">批量拷贝</button>
-		<button onclick="downloadSelectedImages()">批量下载</button>
 	</div>
 	<div id="gallery"></div>
+
+	<div style="text-align: center; margin-top: 20px;">
+		<button onclick="copySelectedUrls()">批量拷贝标注URL</button>
+	</div>
 
 	<!-- 模态框 -->
 	<div class="modal" id="modal">
@@ -222,18 +224,6 @@
 				const actions = document.createElement('div');
 				actions.className = 'action-buttons';
 
-				const openBtn = document.createElement('button');
-				openBtn.textContent = '打开';
-				openBtn.onclick = () => window.open(url, '_blank');
-
-				const copyBtn = document.createElement('button');
-				copyBtn.textContent = '复制';
-				copyBtn.onclick = () => navigator.clipboard.writeText(url);
-
-				const selectBtn = document.createElement('button');
-				selectBtn.textContent = '选择';
-				selectBtn.onclick = () => toggleSelection(url, selectBtn);
-
 				// 添加ABC标注按钮
 				const labelBtnA = document.createElement('button');
 				labelBtnA.textContent = 'A类';
@@ -247,11 +237,7 @@
 				labelBtnC.textContent = 'C类';
 				labelBtnC.onclick = () => labelImage(url, 'C');
 
-				const copyLabelUrlBtn = document.createElement('button');
-				copyLabelUrlBtn.textContent = '复制标注URL';
-				copyLabelUrlBtn.onclick = () => copyLabelUrl(url);
-
-				actions.append(openBtn, copyBtn, selectBtn, labelBtnA, labelBtnB, labelBtnC, copyLabelUrlBtn);
+				actions.append(labelBtnA, labelBtnB, labelBtnC);
 				container.append(img, actions);
 				gallery.append(container);
 			});
@@ -262,21 +248,13 @@
 			alert(`已为图片标注为: ${label}`);
 		}
 
-		function copyLabelUrl(url) {
-			const label = labeledUrls[url] ? labeledUrls[url] : '未标注';
-			const labelUrl = `${url}?label=${label}`;
-			navigator.clipboard.writeText(labelUrl);
-			alert('标注URL已复制');
-		}
-
-		function toggleSelection(url, button) {
-			if (selectedUrls.has(url)) {
-				selectedUrls.delete(url);
-				button.style.backgroundColor = '';
-			} else {
-				selectedUrls.add(url);
-				button.style.backgroundColor = '#4caf50';
-			}
+		function copySelectedUrls() {
+			const labelUrls = Object.keys(labeledUrls).map(url => {
+				const label = labeledUrls[url] || '未标注';
+				return `${url}?label=${label}`;
+			}).join('\n');
+			navigator.clipboard.writeText(labelUrls);
+			alert('选中标注的 URL 已复制！');
 		}
 
 		function openModal(url) {
@@ -296,12 +274,6 @@
 				closeModal();
 			}
 		});
-
-		function copySelectedUrls() {
-			const urls = Array.from(selectedUrls).join('\n');
-			navigator.clipboard.writeText(urls);
-			alert('选中图片的 URL 已复制！');
-		}
 	</script>
 </body>
 
