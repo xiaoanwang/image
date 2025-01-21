@@ -152,19 +152,19 @@
         let selectedUrls = new Set(); // 存储选中的图片 URL
         let annotations = {}; // 存储每张图片的标注状态
 
-       function displayImages() {
-    const urls = getInputUrls();
-    console.log('展示图片 URLs:', urls); // 调试日志
-    displayImagesWithUrls(urls);
-}
+        // 展示所有图片
+        function displayImages() {
+            const urls = getInputUrls();
+            console.log('展示图片 URLs:', urls); // 调试日志
+            displayImagesWithUrls(urls);
+        }
 
-function displayUniqueImages() {
-    const urls = getInputUrls();
-    const uniqueUrls = deduplicateUrls(urls);
-    console.log('去重后的 URLs:', uniqueUrls); // 调试日志
-    displayImagesWithUrls(uniqueUrls);
-
-
+        // 去重展示图片
+        function displayUniqueImages() {
+            const urls = getInputUrls();
+            const uniqueUrls = deduplicateUrls(urls);
+            console.log('去重后的 URLs:', uniqueUrls); // 调试日志
+            displayImagesWithUrls(uniqueUrls);
         }
 
         // 获取输入的 URL 列表
@@ -180,13 +180,13 @@ function displayUniqueImages() {
             urls.forEach(url => {
                 try {
                     const parsedUrl = new URL(url);
-                    const normalizedUrl = ${parsedUrl.origin}${parsedUrl.pathname};
+                    const normalizedUrl = `${parsedUrl.origin}${parsedUrl.pathname}`;
                     if (!uniqueSet.has(normalizedUrl)) {
                         uniqueSet.add(normalizedUrl);
                         uniqueUrls.push(url);
                     }
                 } catch (error) {
-                    console.warn(无效的 URL: ${url});
+                    console.warn('无效的 URL:', url);
                 }
             });
             return uniqueUrls;
@@ -229,7 +229,7 @@ function displayUniqueImages() {
 
             ['A', 'B', 'C'].forEach(label => {
                 const button = document.createElement('button');
-                button.textContent = 标注为 ${label};
+                button.textContent = `标注为 ${label}`;
                 button.onclick = () => {
                     annotations[url] = label;
                     updateAnnotationButtons(annotationContainer, label);
@@ -255,47 +255,46 @@ function displayUniqueImages() {
         async function copyAnnotatedUrls(label) {
             const urls = Object.keys(annotations).filter(url => annotations[url] === label);
             if (urls.length === 0) {
-                alert(没有标注为 ${label} 的图片！);
+                alert(`没有标注为 ${label} 的图片！`);
                 return;
             }
             try {
                 await navigator.clipboard.writeText(urls.join('\n'));
-                alert(标注为 ${label} 的图片 URL 已复制！);
+                alert(`标注为 ${label} 的图片 URL 已复制！`);
             } catch (err) {
                 alert('拷贝失败，请重试！');
             }
         }
 
         function openModal(imageUrl) {
-    const modal = document.getElementById('modal');
-    const modalImage = document.getElementById('modalImage');
-    modalImage.src = imageUrl;
-    modal.style.display = 'flex';
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = imageUrl;
+            modal.style.display = 'flex';
 
-    modalImage.onclick = () => modalImage.classList.toggle('zoomed');
+            modalImage.onclick = () => modalImage.classList.toggle('zoomed');
 
-    // 监听键盘事件
-    document.addEventListener('keydown', handleEscapeKey);
-}
+            // 监听键盘事件
+            document.addEventListener('keydown', handleEscapeKey);
+        }
 
-function closeModal() {
-    const modal = document.getElementById('modal');
-    const modalImage = document.getElementById('modalImage');
-    modal.style.display = 'none';
-    modalImage.classList.remove('zoomed');
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modalImage');
+            modal.style.display = 'none';
+            modalImage.classList.remove('zoomed');
 
-    // 移除键盘事件监听器
-    document.removeEventListener('keydown', handleEscapeKey);
-}
+            // 移除键盘事件监听器
+            document.removeEventListener('keydown', handleEscapeKey);
+        }
 
-// 处理键盘事件的函数
-function handleEscapeKey(event) {
-    if (event.key === 'Escape') {
-        closeModal();
-    }
-}
-
+        // 处理键盘事件的函数
+        function handleEscapeKey(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        }
     </script>
 </body>
 
-</html> 
+</html>
